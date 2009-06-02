@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+                    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="/js/primer/primer.js"></script>
+<script src="/js/br_graph/graph.js"></script>
+<link rel="stylesheet" href="http://dev.jquery.com/view/trunk/qunit/testsuite.css" type="text/css" media="screen" />
+<script>
+$(document).ready(function() {
+
+if ( typeof fireunit === "object" ) {
+   QUnit.log = fireunit.ok;
+   QUnit.done = fireunit.testDone;
+}
+
+module("Initialization");
+var graph = new Graph('#test_graph', 600, 200);
+graph.setData({'jeff larson': [{'date': 1240099200000, 'num_stats': 1}], 
+                'other larson': [{'date':1240099200000, 'num_stats': 2}, 
+                                {'date':1340109200000, 'num_stats': 1}]
+               });
+test("Testing Lines and Points", function(){
+    equals(graph.lines.length, 2); 
+    equals(graph.lines[0].points.length, 1); 
+    equals(graph.lines[1].points.length, 2); 
+});
+module('Testing Functionality');
+test("inner and outer tests", function(){
+    same(graph.outer,[1340109200000, 2]);
+    same(graph.inner, [1240099200000, 1]);
+});
+test("Testing bounds", function(){
+    jQuery.each(graph.lines, function(i, line) {
+        jQuery.each(line.points, function(i, point){
+            var xy = graph.transform(point.x, point.y);
+            ok(graph.width >= xy[0], "within outer bound x " + xy[0] + " " + point.x);
+            ok(graph.height >= xy[1], "within outer bound y " + xy[1] + " " + point.y);
+            ok(0 <= xy[0], "within inner bound x " + xy[0] + " " + point.x);
+            ok(0 <= xy[1], "within inner bound y " + xy[1] + " " + point.y);
+        });
+    });
+});
+test("Testing Reverse and Transform", function(){
+    jQuery.each(graph.lines, function(i, line){
+        jQuery.each(line.points, function(i, point){
+            var transited = graph.transform(point.x, point.y);
+            same(graph.reverse(transited[0], transited[1]), [point.x, point.y]);
+        });
+    });
+});
+
+
+});
+</script>
+</head>
+<body>
+  
+  <script type="text/javascript" src="http://jqueryjs.googlecode.com/svn/trunk/qunit/testrunner.js"></script>
+<h1>Graph Tests</h1>
+<h2 id="banner"></h2>
+<h2 id="userAgent"></h2>
+
+<ol id="tests"></ol>
+
+<div id="main"></div>
+<div id="test_graph"></div>
+
+</body>
+</html>
+
